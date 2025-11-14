@@ -22,7 +22,6 @@ void startServer(const std::string& ip_address, int port)
     std::cout << "Starting server on IP: " << ip_address << " Port: " << port << std::endl;
 
     int server_fd;
-    int client_fd;
 
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
     struct sockaddr_in address;
@@ -55,32 +54,6 @@ void startServer(const std::string& ip_address, int port)
     << "at port " << port << std::endl;
 
     socklen_t addrlen = sizeof(address);
-
-    client_fd = accept(server_fd, (struct sockaddr *)&address, &addrlen);
-
-    if (client_fd < 0)
-    {
-        std::cerr << "Accept failed" << std::endl;
-        close(server_fd);
-    }
-
-    std::cout << "Connection accepted" << std::endl;
-
-    char receive_buffer[1024];
-
-ssize_t bytes_received = read(client_fd, receive_buffer, sizeof(receive_buffer) - 1);
-if (bytes_received < 0)
-{
-    std::cerr << "Read failed" << std::endl;
-    close(client_fd);
-    close(server_fd);
-    return;
-}
-
-receive_buffer[bytes_received] = '\0';  // null-terminate
-std::cout << "Received from client: " << receive_buffer << std::endl;
-
-
 }
 
 int main(int argc, char* argv[]) 

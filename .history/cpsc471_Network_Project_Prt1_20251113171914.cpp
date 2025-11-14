@@ -65,22 +65,7 @@ void startServer(const std::string& ip_address, int port)
     }
 
     std::cout << "Connection accepted" << std::endl;
-
-    char receive_buffer[1024];
-
-ssize_t bytes_received = read(client_fd, receive_buffer, sizeof(receive_buffer) - 1);
-if (bytes_received < 0)
-{
-    std::cerr << "Read failed" << std::endl;
-    close(client_fd);
-    close(server_fd);
-    return;
-}
-
-receive_buffer[bytes_received] = '\0';  // null-terminate
-std::cout << "Received from client: " << receive_buffer << std::endl;
-
-
+    
 }
 
 int main(int argc, char* argv[]) 
