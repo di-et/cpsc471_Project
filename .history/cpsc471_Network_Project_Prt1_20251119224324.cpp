@@ -18,13 +18,13 @@ using namespace std;
 
 void startServer(const std::string &ip_address, int port);
 void handleLsCmmd(int client_fd);
+void handlePutCmmd(int client_fd);
 void handleGetCmmd(int client_fd, const std::string &filename);
-void handlePutCmmd(int client_fd, std::string &filename);
 
 void handleLsCmmd(int client_fd)
 {
     DIR *directory_pointer = opendir("."); // Open current directory
-    if (directory_pointer == nullptr)
+    if (directory_pointer = nullptr)
     {
         const char *err_msg = "Failed to open directory.\n";
         send(client_fd, err_msg, strlen(err_msg), 0);
@@ -62,7 +62,7 @@ void handleGetCmmd(int client_fd, const std::string &filename)
     std::ifstream file_stream(filename, std::ios::binary);
     if (!file_stream.is_open())
     {
-        std::string error_message = "Error: File not found: " + filename + "\n";
+        std::string error_message = "Error: File not found." + filename + "\n";
         send(client_fd, error_message.c_str(), error_message.length(), 0);
         return;
     }
@@ -74,7 +74,7 @@ void handleGetCmmd(int client_fd, const std::string &filename)
 
     if(file_contents.empty())
     {
-        std::string empty_message = "File is empty: " + filename + "\n";
+        std::string empty_message = "File is empty." + filename + "\n";
         send(client_fd, empty_message.c_str(), empty_message.length(), 0);
         return;
     }
@@ -96,7 +96,7 @@ void handlePutCmmd(int client_fd, std::string &filename)
     std::ofstream output_file_stream(filename, std::ios::binary);
     if (!output_file_stream.is_open())
     {
-        std::string error_message = "Error: Cannot create file: " + filename + "\n";
+        std::string error_message = "Error: Cannot create file." + filename + "\n";
         send(client_fd, error_message.c_str(), error_message.length(), 0);
         return;
     }
@@ -129,7 +129,7 @@ void handlePutCmmd(int client_fd, std::string &filename)
     }
     output_file_stream.close();
 
-    std::string success_message = "File received successfully: " + filename + "\n";
+    std::string success_message = "File received successfully." + filename + "\n";
     send(client_fd, success_message.c_str(), success_message.length(), 0);
 }
 
@@ -228,8 +228,7 @@ void startServer(const std::string &ip_address, int port)
 
         if (command.rfind("PUT", 0) == 0)
         {
-            std::string filename = command.substr(4);
-            handlePutCmmd(client_fd, filename);
+            handlePutCmmd(client_fd);
             continue;
         }
 
