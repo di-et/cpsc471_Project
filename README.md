@@ -1,0 +1,88 @@
+# File Transfer Server
+
+A lightweight file-transfer server and client that communicate over TCP and supports four basic commands:
+
+* **ls** - List files on the server
+* **GET <filename>** - Download a file from the server
+* **PUT <filename>** - Upload a file to the server
+* **EXIT** - Close the connection
+
+This project is intended as a minimal demonstration of socket programming and custom application-level protocols.
+
+
+## Features
+
+### ✔ LS
+
+Returns a newline-separated list of files in the server’s directory.
+
+### ✔ GET <filename>
+
+Sends the requested file to the client.
+The server responds with either:
+
+* The contents of the requested file.
+* An error message if the file does not exist.
+
+### ✔ PUT <filename>
+
+Allows the client to upload a file to the 
+server.
+The client sends the filename and data, and the server saves it to disk.
+
+### ✔ EXIT
+
+Disconnects the client.
+The server keeps running and can accept new connections.
+
+
+## Starting the Server
+
+After downloading the server C++ file, compile it using the compiler of your choice.
+
+Example:
+```bash
+g++ cpsc471_Network_project_prt2.cpp -o startserver.out
+```
+
+After compiling, start the server by running the program file with the following arguments: IP address and port number. To start the server locally, do the following
+
+```bash
+./startserver.out 127.0.0.1 8080
+```
+
+## Connecting to the Server 
+
+**REQUIREMENTS:**
+
+A computer networking utility is required to connect to the server. *netcat* is recommended, as connection is simple, and examples will use this 
+
+Example:
+
+```bash
+nc <SERVER_IP> <PORT_NUMBER>
+```
+
+Once connected, you can type commands interactively:
+
+Example Syntax:
+
+```
+ls
+
+GET <filename>
+
+PUT <filename>
+
+EXIT
+```
+
+## Error Handling
+
+The server returns clear responses when something goes wrong:
+
+* `ERROR: File not found: <filename>`
+* `Invalid command.`
+* `ERROR: Cannot create file: <filename>`
+
+---
