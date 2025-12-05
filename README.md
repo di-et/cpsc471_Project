@@ -55,7 +55,7 @@ After compiling, start the server by running the program file with the following
 
 **REQUIREMENTS:**
 
-A computer networking utility is required to connect to the server. *netcat* is recommended, as connection is simple, and examples will use this 
+A computer networking utility is required to connect to the server. *netcat* is recommended, as connection is simple, and following examples will use it. 
 
 Example:
 
