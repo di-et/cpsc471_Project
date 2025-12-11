@@ -20,7 +20,7 @@ using namespace std;
 void startServer(const std::string &ip_address, int port);
 void handleLsCmmd(int client_fd);
 void handleGetCmmd(int client_fd, const std::string &filename);
-void handlePutCmmd(int client_fd, const std::string &filename);
+void handlePutCmmd(int client_fd, std::string &filename);
 void handleClientSession(int client_fd);
 
 
@@ -52,9 +52,6 @@ void handleClientSession(int client_fd)
 
         if (command == "EXIT")
         {
-            const char* exit_msg = "Connection closing as per request.\n";
-            send(client_fd, exit_msg, strlen(exit_msg), 0);
-
             std::cout << "Client requested exit" << std::endl;
             connection_active = false;
             break;
@@ -68,22 +65,13 @@ void handleClientSession(int client_fd)
 
         if (command.rfind("GET", 0) == 0)
         {
-            std::string filename = command.substr(3);
-            if (!filename.empty() && filename[0] == ' ')
-            {
-                filename.erase(0, 1); // Remove leading space
-            }
-            handleGetCmmd(client_fd, filename);
+            handleGetCmmd(client_fd, command.substr(4));
             continue;
         }
 
         if (command.rfind("PUT", 0) == 0)
         {
-            std::string filename = command.substr(3);
-            if (!filename.empty() && filename[0] == ' ')
-            {
-                filename.erase(0, 1); // Remove leading space
-            }
+            std::string filename = command.substr(4);
             handlePutCmmd(client_fd, filename);
             continue;
         }
@@ -162,7 +150,7 @@ std::string footer = "\nEND OF FILE\n";
 send(client_fd, footer.c_str(), footer.length(), 0);
 }
 
-void handlePutCmmd(int client_fd, const std::string &filename)
+void handlePutCmmd(int client_fd, std::string &filename)
 {
     const char *ready_msg = "READY TO RECEIVE FILE\n";
     send(client_fd, ready_msg, strlen(ready_msg), 0);
@@ -220,7 +208,7 @@ void startServer(const std::string &ip_address, int port)
     }
 
     struct sockaddr_in address;
-    memset(&address, 0, sizeof(address));
+    memset(&address, '0', sizeof(address));
 
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = inet_addr(ip_address.c_str());
@@ -263,6 +251,7 @@ void startServer(const std::string &ip_address, int port)
 
     close(server_fd);
     std::cout << "Server stopped" << std::endl;
+
 }
 
 int main(int argc, char *argv[])
@@ -287,9 +276,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
-//TODO: load balancer
-//TODO: Authnentication
-//TODO: Encryption
-//TODO: UI
-//TODO: AI functions

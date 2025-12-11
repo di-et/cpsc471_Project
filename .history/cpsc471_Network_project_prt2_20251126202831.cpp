@@ -20,7 +20,7 @@ using namespace std;
 void startServer(const std::string &ip_address, int port);
 void handleLsCmmd(int client_fd);
 void handleGetCmmd(int client_fd, const std::string &filename);
-void handlePutCmmd(int client_fd, const std::string &filename);
+void handlePutCmmd(int client_fd, std::string &filename);
 void handleClientSession(int client_fd);
 
 
@@ -52,9 +52,6 @@ void handleClientSession(int client_fd)
 
         if (command == "EXIT")
         {
-            const char* exit_msg = "Connection closing as per request.\n";
-            send(client_fd, exit_msg, strlen(exit_msg), 0);
-
             std::cout << "Client requested exit" << std::endl;
             connection_active = false;
             break;
@@ -287,9 +284,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
-//TODO: load balancer
-//TODO: Authnentication
-//TODO: Encryption
-//TODO: UI
-//TODO: AI functions

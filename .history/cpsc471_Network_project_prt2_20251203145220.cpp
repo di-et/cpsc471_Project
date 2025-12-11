@@ -290,6 +290,5 @@ int main(int argc, char *argv[])
 
 //TODO: load balancer
 //TODO: Authnentication
-//TODO: Encryption
 //TODO: UI
 //TODO: AI functions

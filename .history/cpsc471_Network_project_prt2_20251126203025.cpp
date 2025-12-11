@@ -52,9 +52,6 @@ void handleClientSession(int client_fd)
 
         if (command == "EXIT")
         {
-            const char* exit_msg = "Connection closing as per request.\n";
-            send(client_fd, exit_msg, strlen(exit_msg), 0);
-
             std::cout << "Client requested exit" << std::endl;
             connection_active = false;
             break;
@@ -287,9 +284,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
-//TODO: load balancer
-//TODO: Authnentication
-//TODO: Encryption
-//TODO: UI
-//TODO: AI functions

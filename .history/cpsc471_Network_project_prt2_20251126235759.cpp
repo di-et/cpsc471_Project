@@ -287,9 +287,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
-//TODO: load balancer
-//TODO: Authnentication
-//TODO: Encryption
-//TODO: UI
-//TODO: AI functions

@@ -20,7 +20,7 @@ using namespace std;
 void startServer(const std::string &ip_address, int port);
 void handleLsCmmd(int client_fd);
 void handleGetCmmd(int client_fd, const std::string &filename);
-void handlePutCmmd(int client_fd, const std::string &filename);
+void handlePutCmmd(int client_fd, std::string &filename);
 void handleClientSession(int client_fd);
 
 
@@ -52,9 +52,6 @@ void handleClientSession(int client_fd)
 
         if (command == "EXIT")
         {
-            const char* exit_msg = "Connection closing as per request.\n";
-            send(client_fd, exit_msg, strlen(exit_msg), 0);
-
             std::cout << "Client requested exit" << std::endl;
             connection_active = false;
             break;
@@ -68,22 +65,13 @@ void handleClientSession(int client_fd)
 
         if (command.rfind("GET", 0) == 0)
         {
-            std::string filename = command.substr(3);
-            if (!filename.empty() && filename[0] == ' ')
-            {
-                filename.erase(0, 1); // Remove leading space
-            }
-            handleGetCmmd(client_fd, filename);
+            handleGetCmmd(client_fd, command.substr(4));
             continue;
         }
 
         if (command.rfind("PUT", 0) == 0)
         {
-            std::string filename = command.substr(3);
-            if (!filename.empty() && filename[0] == ' ')
-            {
-                filename.erase(0, 1); // Remove leading space
-            }
+            std::string filename = command.substr(4);
             handlePutCmmd(client_fd, filename);
             continue;
         }
@@ -162,7 +150,7 @@ std::string footer = "\nEND OF FILE\n";
 send(client_fd, footer.c_str(), footer.length(), 0);
 }
 
-void handlePutCmmd(int client_fd, const std::string &filename)
+void handlePutCmmd(int client_fd, std::string &filename)
 {
     const char *ready_msg = "READY TO RECEIVE FILE\n";
     send(client_fd, ready_msg, strlen(ready_msg), 0);
@@ -212,16 +200,19 @@ void startServer(const std::string &ip_address, int port)
 {
     std::cout << "Starting server on IP: " << ip_address << " Port: " << port << std::endl;
 
-    int server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    int server_fd;
+    int client_fd;
+
+    server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    struct sockaddr_in address;
+
     if (server_fd == -1)
     {
         std::cerr << "Socket creation error" << std::endl;
         return;
     }
 
-    struct sockaddr_in address;
-    memset(&address, 0, sizeof(address));
-
+    memset(&address, '0', sizeof(address));
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = inet_addr(ip_address.c_str());
     address.sin_port = htons(port);
@@ -231,7 +222,6 @@ void startServer(const std::string &ip_address, int port)
     {
         std::cerr << "Bind failed" << std::endl;
         close(server_fd);
-        return;
     }
 
     // listen for connections
@@ -239,30 +229,79 @@ void startServer(const std::string &ip_address, int port)
     {
         std::cerr << "Listen failed" << std::endl;
         close(server_fd);
-        return;
     }
+    std::cout << "Server is listening on " << ip_address
+              << "at port " << port << std::endl;
 
-    std::cout << "Server listening on " << ip_address << " at port " << port << std::endl;
     socklen_t addrlen = sizeof(address);
 
-    while(true)
-    {
-        int client_fd = accept(server_fd, (struct sockaddr *)&address, &addrlen);
+    client_fd = accept(server_fd, (struct sockaddr *)&address, &addrlen);
 
-        if (client_fd < 0)
+    if (client_fd < 0)
+    {
+        std::cerr << "Accept failed" << std::endl;
+        close(server_fd);
+    }
+
+    std::cout << "Connection accepted" << std::endl;
+
+    bool connection_active = true;
+    char buffer[1024];
+
+    while (connection_active)
+    {
+        memset(buffer, 0, sizeof(buffer));
+
+        ssize_t bytes_received = read(client_fd, buffer, sizeof(buffer) - 1);
+
+        if (bytes_received <= 0)
         {
-            std::cerr << "Accept failed" << std::endl;
+            std::cout << "client disconnected" << std::endl;
+            break;
+        }
+
+        buffer[bytes_received] = '\0'; // null-terminate
+        std::cout << "Received from client: " << buffer << std::endl;
+
+        std::string command(buffer);
+        if (!command.empty() && command.back() == '\n')
+        {
+            command.pop_back();
+        }
+
+        if (command == "EXIT")
+        {
+            std::cout << "Client requested exit" << std::endl;
+            connection_active = false;
+            break;
+        }
+
+        if (command == "ls")
+        {
+            handleLsCmmd(client_fd);
             continue;
         }
 
-        std::cout << "Client connected" << std::endl;
+        if (command.rfind("GET", 0) == 0)
+        {
+            handleGetCmmd(client_fd, command.substr(4));
+            continue;
+        }
 
-        std::thread client_thread(handleClientSession, client_fd);
-        client_thread.detach();
+        if (command.rfind("PUT", 0) == 0)
+        {
+            std::string filename = command.substr(4);
+            handlePutCmmd(client_fd, filename);
+            continue;
+        }
+
+        const char* invalid = "Invalid command.\n";
+        send(client_fd, invalid, strlen(invalid), 0);        
     }
 
+    close(client_fd);
     close(server_fd);
-    std::cout << "Server stopped" << std::endl;
+
 }
 
 int main(int argc, char *argv[])
@@ -287,9 +326,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
-//TODO: load balancer
-//TODO: Authnentication
-//TODO: Encryption
-//TODO: UI
-//TODO: AI functions
